@@ -50,9 +50,11 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {})
         ],
       ),
+
       drawer: new Drawer(
         child: new ListView(
           children: <Widget>[
+
             //  header
             new UserAccountsDrawerHeader(
               accountName: Text("Hatice Nur"),
@@ -68,7 +70,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-  //        body
+              //   body
               InkWell(
                 onTap: () {},
                  child: ListTile(
@@ -140,6 +142,7 @@ class _HomePageState extends State<HomePage> {
 
       body: new ListView(
         children: <Widget>[
+          
           //image carousel begins here
           image_carousel,
 
