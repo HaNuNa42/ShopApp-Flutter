@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 
+//my own imports
+import 'package:ecommerce/components/horizontal_listview.dart';
+import 'package:ecommerce/components/products.dart';
+
 void main() {
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: HomePage()));
 }
@@ -136,7 +140,25 @@ class _HomePageState extends State<HomePage> {
 
       body: new ListView(
         children: <Widget>[
-          image_carousel
+          //image carousel begins here
+          image_carousel,
+
+          //padding widget
+          new Padding(padding: const EdgeInsets.all(8.0),
+          child: new Text("Categories"),),
+
+           //Horizontal listview begins here
+          HorizontalList(),
+
+          //padding widget
+          new Padding(padding: const EdgeInsets.all(20.0),
+          child: new Text("Recent Products"),),
+          
+          //gridview 
+          Container(
+            height: 320.0,
+            child: Products(),
+          )
         ],
       ),
     );
