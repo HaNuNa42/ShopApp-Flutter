@@ -19,7 +19,31 @@ class _ProductsState extends State<Products> {
       "picture": "images/products/dress1.jpeg",
       "old_price": 100,
       "price": 50,
-    }
+    },
+    {
+      "name": "Shoe",
+      "picture": "images/products/hills1.jpeg",
+      "old_price": 400,
+      "price": 340,
+    },
+    {
+      "name": "Blazer",
+      "picture": "images/products/skt1.jpeg",
+      "old_price": 180,
+      "price": 100,
+    },
+    {
+      "name": "Skt",
+      "picture": "images/products/skt2.jpeg",
+      "old_price": 150,
+      "price": 70,
+    },
+    {
+      "name": "Black Dress",
+      "picture": "images/products/dress2.jpeg",
+      "old_price": 200,
+      "price": 170,
+    },
   ];
 
   @override
@@ -61,10 +85,10 @@ class Single_prod extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Hero(
-      tag: prod_name,
+      tag: new Text("hero 1"),
       child: Material(
           child: InkWell(
-        onTap: () => Navigator.of(context).push(new MaterialPageRoute(
+            onTap: () => Navigator.of(context).push(new MaterialPageRoute(
 
           //here we are passing the values of the product to the product details page
           builder: (context) => new ProductDetails(
@@ -78,26 +102,13 @@ class Single_prod extends StatelessWidget {
         child: GridTile(
             footer: Container(
               color: Colors.white70,
-              child: ListTile(
-                leading: Text(
-                  prod_name,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-
-                title: Text(
-                  "\$$prod_price",
-                  style: TextStyle(
-                      color: Colors.pink, fontWeight: FontWeight.w800),
-                ),
-                
-                subtitle: Text(
-                  "\$$prod_old_price",
-                  style: TextStyle(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w800,
-                      decoration: TextDecoration.lineThrough),
-                ),
-              ),
+              child: new Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Text(prod_name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.0),),),
+                  new Text("\$${prod_price}", style: TextStyle(color: Colors.pink, fontWeight: FontWeight.bold, fontSize: 15.0))
+                ],
+              )
             ),
             child: Image.asset(
               prod_picture,
