@@ -7,41 +7,41 @@ class Products extends StatefulWidget {
 }
 
 class _ProductsState extends State<Products> {
-  var product_list = [
+  var productList = [
     {
       "name": "Blazer",
       "picture": "images/products/blazer1.jpeg",
-      "old_price": 120,
+      "oldPrice": 120,
       "price": 85,
     },
     {
       "name": "Red Dress",
       "picture": "images/products/dress1.jpeg",
-      "old_price": 100,
+      "oldPrice": 100,
       "price": 50,
     },
     {
       "name": "Shoe",
       "picture": "images/products/hills1.jpeg",
-      "old_price": 400,
+      "oldPrice": 400,
       "price": 340,
     },
     {
       "name": "Blazer",
       "picture": "images/products/skt1.jpeg",
-      "old_price": 180,
+      "oldPrice": 180,
       "price": 100,
     },
     {
       "name": "Skt",
       "picture": "images/products/skt2.jpeg",
-      "old_price": 150,
+      "oldPrice": 150,
       "price": 70,
     },
     {
       "name": "Black Dress",
       "picture": "images/products/dress2.jpeg",
-      "old_price": 200,
+      "oldPrice": 200,
       "price": 170,
     },
   ];
@@ -49,7 +49,7 @@ class _ProductsState extends State<Products> {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      itemCount: product_list.length,
+      itemCount: productList.length,
       gridDelegate:
           new SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2
@@ -58,11 +58,11 @@ class _ProductsState extends State<Products> {
       itemBuilder: (BuildContext context, int index) {
         return Padding(
           padding: const EdgeInsets.all(4.0),
-          child: Single_prod(
-          prod_name: product_list[index]['name'],
-          prod_picture: product_list[index]['picture'],
-          prod_old_price: product_list[index]['old_price'],
-          prod_price: product_list[index]['price'],
+          child: SingleProd(
+          prodName: productList[index]['name'],
+          prodPicture: productList[index]['picture'],
+          prodOldPrice: productList[index]['old_price'],
+          prodPrice: productList[index]['price'],
         ),
         );
       },
@@ -70,17 +70,17 @@ class _ProductsState extends State<Products> {
   }
 }
 
-class Single_prod extends StatelessWidget {
-  final prod_name;
-  final prod_picture;
-  final prod_old_price;
-  final prod_price;
+class SingleProd extends StatelessWidget {
+  final prodName;
+  final prodPicture;
+  final prodOldPrice;
+  final prodPrice;
 
-  Single_prod({
-      this.prod_name,
-      this.prod_picture,
-      this.prod_old_price,
-      this.prod_price,
+  SingleProd({
+      this.prodName,
+      this.prodPicture,
+      this.prodOldPrice,
+      this.prodPrice,
   });
 
   @override
@@ -94,10 +94,10 @@ class Single_prod extends StatelessWidget {
 
           //here we are passing the values of the product to the product details page
           builder: (context) => new ProductDetails(
-            product_detail_name: prod_name,
-            product_detail_new_price: prod_price,
-            product_detail_old_price: prod_old_price,
-            product_detail_picture: prod_picture,
+            productDetailName: prodName,
+            productDetailNewPrice: prodPrice,
+            productDetailOldPrice: prodOldPrice,
+            productDetailPicture: prodPicture,
 
           ))),
         
@@ -107,13 +107,13 @@ class Single_prod extends StatelessWidget {
               child: new Row(
                 children: <Widget>[
                   Expanded(
-                    child: Text(prod_name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.0),),),
-                  new Text("\$${prod_price}", style: TextStyle(color: Colors.pink, fontWeight: FontWeight.bold, fontSize: 15.0))
+                    child: Text(prodName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.0),),),
+                  new Text("\$$prodPrice", style: TextStyle(color: Colors.pink, fontWeight: FontWeight.bold, fontSize: 15.0))
                 ],
               )
             ),
             child: Image.asset(
-              prod_picture,
+              prodPicture,
               fit: BoxFit.cover,
             )),
       )),

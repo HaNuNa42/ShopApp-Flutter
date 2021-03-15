@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ecommerce/pages/signup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,6 +17,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final GoogleSignIn googleSignIn = new GoogleSignIn();
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
   final _formKey = GlobalKey<FormState>();
   TextEditingController _emailTextController = TextEditingController();
   TextEditingController _passwordTextController = TextEditingController();
@@ -27,6 +30,14 @@ class _LoginState extends State<Login> {
   void initState() {
     super.initState();
     isSignedIn();
+    Fluttertoast toast = Fluttertoast();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _emailTextController.dispose();
+    _passwordTextController.dispose();
   }
 
   void isSignedIn() async {
@@ -34,10 +45,19 @@ class _LoginState extends State<Login> {
       loading = true;
     });
 
-  if (isLogedin){
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomePage()));
-  }
+    final User user = firebaseAuth.currentUser;
+    if (user != null) {
+      setState(() => isLogedin = true);
+    }
 
+    if (isLogedin) {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => HomePage(
+                    mailState: _emailTextController.text,
+                  )));
+    }
 
     preferences = await SharedPreferences.getInstance();
     isLogedin = await googleSignIn.isSignedIn();
@@ -47,7 +67,11 @@ class _LoginState extends State<Login> {
     });
   }
 
-  Future<FirebaseUser> handleSignIn() async {
+  Future<User> _handleSignOut() async {
+    googleSignIn.disconnect();
+  }
+
+  Future<User> handleSignIn() async {
     preferences = await SharedPreferences.getInstance();
 
     setState(() {
@@ -58,54 +82,80 @@ class _LoginState extends State<Login> {
     GoogleSignInAuthentication googleSignInAuthentication =
         await googleUser.authentication;
 
-    AuthCredential credential = GoogleAuthProvider.getCredential(
+    AuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleSignInAuthentication.idToken,
         accessToken: googleSignInAuthentication.accessToken);
-    FirebaseUser firebaseUser =
+    User firebaseUser =
         (await firebaseAuth.signInWithCredential(credential)).user;
     print("signed in " + firebaseUser.displayName);
 
     if (firebaseUser != null) {
-      final QuerySnapshot result = await Firestore.instance
+      final QuerySnapshot result = await FirebaseFirestore.instance
           .collection('users')
           .where('id', isEqualTo: firebaseUser.uid)
-          .getDocuments();
-      final List<DocumentSnapshot> documents = result.documents;
+          .get();
+      final List<DocumentSnapshot> documents = result.docs;
 
       if (documents.length == 0) {
 //       insert the user to our collection
-        Firestore.instance
+        FirebaseFirestore.instance
             .collection('users')
-            .document(firebaseUser.uid)
-            .setData({
+            .doc(firebaseUser.uid)
+            .set({
           "id": firebaseUser.uid,
           "username": firebaseUser.displayName,
-          "profilePicture": firebaseUser.photoUrl,
+          "profilePicture": firebaseUser.photoURL,
         });
 
         await preferences.setString("id", firebaseUser.uid);
         await preferences.setString("username", firebaseUser.displayName);
-        await preferences.setString("photoUrl", firebaseUser.displayName);
+        await preferences.setString("photoURL", firebaseUser.photoURL);
       } else {
         await preferences.setString("id", documents[0]["id"]);
         await preferences.setString("username", documents[0]["username"]);
-        await preferences.setString("photoUrl", documents[0]["photoUrl"]);
+        await preferences.setString("photoURL", documents[0]["photoURL"]);
       }
 
-      Fluttertoast.showToast(msg: "login was successful");
+      Widget toast = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25.0),
+          color: Color.fromRGBO(61, 61, 61, .7),
+        ),
+        child: Text(
+          "login was successful",
+          style: TextStyle(color: Colors.white),
+        ),
+      );
+
       setState(() {
         loading = false;
       });
 
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => HomePage()));
+          context,
+          MaterialPageRoute(
+              builder: (context) => HomePage(
+                    mailState: firebaseUser.displayName
+                  )));
     } else {
-      Fluttertoast.showToast(msg: "login failed");
+      Widget toast = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25.0),
+          color: Color.fromRGBO(61, 61, 61, .7),
+        ),
+        child: Text(
+          "login was failed",
+          style: TextStyle(color: Colors.white),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height / 3;
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -115,13 +165,11 @@ class _LoginState extends State<Login> {
             width: double.infinity,
             height: double.infinity,
           ),
-
           Container(
             color: Colors.black.withOpacity(0.8),
             width: double.infinity,
             height: double.infinity,
           ),
-
           Padding(
             padding: const EdgeInsets.all(70.0),
             child: Container(
@@ -133,7 +181,6 @@ class _LoginState extends State<Login> {
               ),
             ),
           ),
-
           Center(
             child: Padding(
               padding: const EdgeInsets.only(top: 200.0),
@@ -143,7 +190,8 @@ class _LoginState extends State<Login> {
                     child: ListView(
                       children: <Widget>[
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(14.0, 8.0, 14.0, 8.0),
+                          padding:
+                              const EdgeInsets.fromLTRB(14.0, 8.0, 14.0, 8.0),
                           child: Material(
                             borderRadius: BorderRadius.circular(30.0),
                             color: Colors.white.withOpacity(0.8),
@@ -173,9 +221,9 @@ class _LoginState extends State<Login> {
                             ),
                           ),
                         ),
-
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(14.0, 8.0, 14.0, 8.0),
+                          padding:
+                              const EdgeInsets.fromLTRB(14.0, 8.0, 14.0, 8.0),
                           child: Material(
                             borderRadius: BorderRadius.circular(30.0),
                             color: Colors.white.withOpacity(0.8),
@@ -202,7 +250,8 @@ class _LoginState extends State<Login> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(14.0, 8.0, 14.0, 8.0),
+                          padding:
+                              const EdgeInsets.fromLTRB(14.0, 8.0, 14.0, 8.0),
                           child: Material(
                             borderRadius: BorderRadius.circular(30.0),
                             color: Colors.blue.withOpacity(0.8),
@@ -221,78 +270,78 @@ class _LoginState extends State<Login> {
                             ),
                           ),
                         ),
-
                         Padding(
                           padding: const EdgeInsets.all(8.0),
-                             child: Text ("Forgot password", 
-                             textAlign: TextAlign.center,
-                             style: TextStyle(color: Colors.white,
-                             fontWeight: FontWeight.w400
-                             ),
-                             ), 
+                          child: Text(
+                            "Forgot password",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w400),
+                          ),
                         ),
-                        
-                    
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
-                           child: InkWell(
-                             onTap: () {
-                               Navigator.push(context, MaterialPageRoute(builder: (context)=> SignUp()));
-                             },
-                             child: Text ("Sign up", textAlign: TextAlign.center, style: TextStyle(color: Colors.pink),))
-                        ),
-
-                      Divider(color: Colors.white),
-                      Text(
-                        "other login in option", 
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.normal,
-                            fontSize: 14.0),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Material(
-                          borderRadius: BorderRadius.circular(30.0),
-                          color: Colors.pink.withOpacity(0.8),
-                          elevation: 0.0,
-                          child: MaterialButton(
-                            onPressed: () {
-                              handleSignIn();
-                            },
-                            minWidth: MediaQuery.of(context).size.width,
-                            child: Row(
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Image.asset(
-                                    "images/google.png",
-                                    width: 30.0,
-                                    height: 30.0,
-                                  ),
-                                ),
-                                Text(
-                                  "Google",
+                            padding: const EdgeInsets.all(8.0),
+                            child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => SignUp()));
+                                },
+                                child: Text(
+                                  "Sign up",
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17.0),
-                                ),
-                              ],
+                                  style: TextStyle(color: Colors.pink),
+                                ))),
+                        Divider(color: Colors.white),
+                        Text(
+                          "other login",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.normal,
+                              fontSize: 14.0),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Material(
+                            borderRadius: BorderRadius.circular(30.0),
+                            color: Colors.pink.withOpacity(0.8),
+                            elevation: 0.0,
+                            child: MaterialButton(
+                              onPressed: () {
+                                handleSignIn();
+                              },
+                              minWidth: MediaQuery.of(context).size.width,
+                              child: Row(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Image.asset(
+                                      "images/google.png",
+                                      width: 30.0,
+                                      height: 30.0,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Google",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17.0),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                   
                       ],
-                    )
-                    ),
+                    )),
               ),
             ),
           ),
-
           Visibility(
             visible: loading ?? true,
             child: Center(

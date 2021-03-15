@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 //my imports
-import 'package:ecommerce/components/cart_products.dart';
+import 'package:ecommerce/components/cartProducts.dart';
 
 class Cart extends StatefulWidget {
   @override
@@ -23,7 +23,7 @@ class _CartState extends State<Cart> {
         ],
       ),
 
-      body: new Cart_products(),
+      body: new CartProducts(),
 
       bottomNavigationBar: new Container(
         color: Colors.white,

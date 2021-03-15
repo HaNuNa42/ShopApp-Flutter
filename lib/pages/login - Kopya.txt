@@ -40,7 +40,7 @@ class _LoginState extends State<Login> {
     });
   }
 
-  Future<FirebaseUser> handleSignIn() async {
+  Future<User> handleSignIn() async {
     preferences = await SharedPreferences.getInstance();
 
     setState(() {
@@ -51,29 +51,29 @@ class _LoginState extends State<Login> {
     GoogleSignInAuthentication googleSignInAuthentication =
         await googleUser.authentication;
 
-    AuthCredential credential = GoogleAuthProvider.getCredential(
+    AuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleSignInAuthentication.idToken,
         accessToken: googleSignInAuthentication.accessToken);
-    FirebaseUser firebaseUser =
+    User firebaseUser =
         (await firebaseAuth.signInWithCredential(credential)).user;
     print("signed in " + firebaseUser.displayName);
 
     if (firebaseUser != null) {
-      final QuerySnapshot result = await Firestore.instance
+      final QuerySnapshot result = await FirebaseFirestore.instance
           .collection('users')
           .where('id', isEqualTo: firebaseUser.uid)
-          .getDocuments();
-      final List<DocumentSnapshot> documents = result.documents;
+          .get();
+      final List<DocumentSnapshot> documents = result.docs;
 
       if (documents.length == 0) {
 //       insert the user to our collection
-        Firestore.instance
+        FirebaseFirestore.instance
             .collection('users')
-            .document(firebaseUser.uid)
-            .setData({
+            .doc(firebaseUser.uid)
+            .set({
           "id": firebaseUser.uid,
           "username": firebaseUser.displayName,
-          "profilePicture": firebaseUser.photoUrl,
+          "profilePicture": firebaseUser.photoURL,
         });
 
         await preferences.setString("id", firebaseUser.uid);

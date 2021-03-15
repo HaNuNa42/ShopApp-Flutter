@@ -1,5 +1,6 @@
-import 'package:ecommerce/pages/home.dart';
+import 'package:ecommerce/pages/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommerce/db/users.dart';
 
@@ -9,18 +10,29 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
+
   TextEditingController _emailTextController = TextEditingController();
   TextEditingController _passwordTextController = TextEditingController();
   TextEditingController _confirmPasswordTextController =
       TextEditingController();
   TextEditingController _nameTextController = TextEditingController();
   String gender;
-  String groupValue = "male";
+  String groupValue;
   bool loading = false;
   bool hidePass = true;
   UserServices _userServices = UserServices();
+
+  @override
+  void dispose() {
+    super.dispose();
+    _emailTextController.dispose();
+    _passwordTextController.dispose();
+    _confirmPasswordTextController.dispose();
+    _nameTextController.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +272,7 @@ class _SignUpState extends State<SignUp> {
                             color: Colors.blue.withOpacity(0.8),
                             elevation: 0.0,
                             child: MaterialButton(
-                              onPressed: () async{
+                              onPressed: () async {
                                 validateForm();
                               },
                               minWidth: MediaQuery.of(context).size.width,
@@ -320,29 +332,30 @@ class _SignUpState extends State<SignUp> {
     });
   }
 
-  Future<void> validateForm() async {
+  Future validateForm() async {
     FormState formState = _formKey.currentState;
 
     if (formState.validate()) {
-      formState.reset();
-      FirebaseUser user = await firebaseAuth.currentUser();
+      User user = firebaseAuth.currentUser;
       if (user == null) {
         firebaseAuth
             .createUserWithEmailAndPassword(
                 email: _emailTextController.text,
                 password: _passwordTextController.text)
             .then((user) => {
-                  _userServices.createUser(user.user.uid, {
-                    "username": user.user.displayName,
-                    "email": user.user.email,
+                  _userServices.createUser({
+                    "username": _nameTextController.text,
+                    "email": _emailTextController.text,
                     "userId": user.user.uid,
-                    "gender": gender,
+                    "gender": (gender.toString()),
                   })
                 })
-            .catchError((err) => {print(err.toString())});
+            .catchError((err) => {print('error is :' + err.toString())});
 
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomePage()));
+            context, MaterialPageRoute(builder: (context) => Login()));
+      } else {
+        print("already a user");
       }
     }
   }
