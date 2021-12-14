@@ -1,0 +1,4 @@
+#Wed Dec 15 02:40:27 EET 2021
+base.0=C\:\\Users\\parthenia\\ShopApp-Flutter\\build\\app\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
